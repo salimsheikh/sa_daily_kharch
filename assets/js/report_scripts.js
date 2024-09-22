@@ -1,4 +1,8 @@
 jQuery(document).ready(function(){
+
+	jQuery(".start_date, .end_date").datepicker({
+		"dateFormat" : "YY-mm-dd"
+	});
 	
 	jQuery("button.button_dispaly_modal").click(function(){
 		jQuery("#entery_id").val(0);
