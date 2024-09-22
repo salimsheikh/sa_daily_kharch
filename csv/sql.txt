@@ -1,0 +1,1 @@
+DELETE FROM `wp_sa_daily_kharch` WHERE `wp_sa_daily_kharch`.`date` LIKE '2023-12%';
