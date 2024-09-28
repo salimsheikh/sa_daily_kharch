@@ -83,13 +83,10 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
             $wpdb->update($table_name, array('name'=>'Alfiya'), array('name'=>'Alifiya'));
             $wpdb->update($table_name, array('name'=>'Alfiya'), array('name'=>'Alifya'));
 
-
             $wpdb->update($table_name, array('name'=>'Saima'), array('name'=>'Sima'));
             $wpdb->update($table_name, array('name'=>'Husain'), array('name'=>'Husan'));
             $wpdb->update($table_name, array('name'=>'Husain'), array('name'=>'Hsain'));
-            $wpdb->update($table_name, array('name'=>'Sadaka'), array('name'=>'Sadka'));
-
-            
+            $wpdb->update($table_name, array('name'=>'Sadaka'), array('name'=>'Sadka'));            
         }
 		
 		function admin_menu_page()
@@ -221,6 +218,26 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
                     $columns['month'] = esc_html__('Month', 'textdomain');
                     $columns['amount'] = esc_html__('Amount', 'textdomain');
                     break;
+                case "name":
+                    $columns[$report_type] = esc_html__('Name', 'textdomain');
+                    $columns['amount'] = esc_html__('Amount', 'textdomain');
+                    break;
+                case "category":
+                    $columns[$report_type] = esc_html__('Category', 'textdomain');
+                    $columns['amount'] = esc_html__('Amount', 'textdomain');
+                    break;
+                case "sub_category":
+                    $columns[$report_type] = esc_html__('Sub Category', 'textdomain');
+                    $columns['amount'] = esc_html__('Amount', 'textdomain');
+                    break;
+                case "type":
+                    $columns[$report_type] = esc_html__('Type', 'textdomain');
+                    $columns['amount'] = esc_html__('Amount', 'textdomain');
+                    break;
+                default:
+                    $columns[$report_type] = $report_type;
+                    $columns['amount'] = esc_html__('Amount', 'textdomain');
+                    break;
             }
             return $columns;
         }
@@ -255,36 +272,36 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 			return($sql);
 		}
 
-        function get_daily_report($report_type = ''){
+        function get_items_data($report_type = ''){
             global $wpdb;
 
             $table_name = $this->constants['daily_table_name'];
 
-            $sql = " SELECT date,name,category,sub_category,type, amount";
+            $sql = " SELECT ";
+            switch($report_type){
+                case "name":
+                case "category":
+                case "sub_category":
+                case "type":
+                    $sql .= " {$report_type} AS  group_by";
+                    $sql .= " ,{$report_type}";
+                    $sql .= " ,SUM(ROUND(amount,2)) AS amount";
+                break;
+                case "daily":
+                    $sql .= " date AS  group_by";
+                    $sql .= " ,date,name,category,sub_category,type,amount";
+                    break;
+                case "monthly":
+                    $sql .= " DATE_FORMAT(date, '%Y-%m') AS  month";
+                    $sql .= " ,DATE_FORMAT(date, '%Y-%m') AS  group_by";
+                    $sql .= " ,SUM(ROUND(amount,2)) AS amount";
+                    break;
+            }
             $sql .= " FROM {$table_name} AS d";
             $sql .= " WHERE 1*1";
             $sql .= $this->get_where_query();
-            $sql .= " GROUP BY date";
-            $sql .= " ORDER BY date ASC";
-            
-            $items = $wpdb->get_results($sql);
-
-            return $this->get_grid($items,'datatable',$report_type);
-        }
-
-        function get_montly_report($report_type = ''){
-            global $wpdb;
-
-            $table_name = $this->constants['daily_table_name'];
-
-            $sql = " SELECT ";							
-            $sql .= " SUM(ROUND(amount,2)) AS amount";
-            $sql .= " ,DATE_FORMAT(date, '%Y-%m') AS  month";
-            $sql .= " FROM {$table_name} AS d";
-            $sql .= " WHERE 1*1";
-            $sql .= $this->get_where_query();
-            $sql .= " GROUP BY month";
-            $sql .= " ORDER BY month ASC";
+            $sql .= " GROUP BY group_by";
+            $sql .= " ORDER BY group_by ASC";
             
             $items = $wpdb->get_results($sql);
 
@@ -292,11 +309,13 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
         }
 
         function get_items(){
-           
             $output = "";
-            $output .= $this->get_daily_report('daily');
-            $output .= $this->get_montly_report('monthly');
-
+            $output .= $this->get_items_data('daily');
+            $output .= $this->get_items_data('monthly');
+            $output .= $this->get_items_data('name');
+            $output .= $this->get_items_data('category');
+            $output .= $this->get_items_data('sub_category');
+            $output .= $this->get_items_data('type');
             return $output;
         }
 
