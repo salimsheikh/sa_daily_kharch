@@ -27,6 +27,8 @@ jQuery(document).ready(function(){
            jQuery("#myModal").fadeOut();
        }
    });
+
+   
 	
 	new DataTable('.datatable.daily_kharch_report', {
 		searching: true,

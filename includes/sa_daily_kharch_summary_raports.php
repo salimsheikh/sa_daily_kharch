@@ -12,6 +12,85 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 			$this->constants['daily_table_name'] = $wpdb->daily_kharch;
             $this->constants['default_report_type'] = '';
 		}
+
+        function get_month_dropdown_data($group_by = 'month'){
+            global $wpdb;
+            $table_name = $this->constants['daily_table_name'];
+
+            $sql = " SELECT ";
+            switch($group_by){
+                case "month":
+                    $sql .= " DATE_FORMAT(date, '%Y-%m') AS value, DATE_FORMAT(date, '%Y %M') AS label";
+                    break;
+                default:
+                    $sql .= " {$group_by} AS value, $group_by AS label";
+                    break;                    
+            }            
+            $sql .= " FROM {$table_name} AS d";
+            $sql .= " WHERE 1*1";            
+            $sql .= " GROUP BY value";
+            switch($group_by){
+                case "month":
+                    $sql .= " ORDER BY value DESC";
+                    break;
+                default:
+                    $sql .= " ORDER BY value ASC";
+                    break;                    
+            }
+            $items = $wpdb->get_results($sql);
+
+            return $items;
+        }
+
+        function get_month_dropdown_fields(){
+            $dropdowns = array(
+                'month' => esc_html__('Month','textdomain'),
+                'name' => esc_html__('Name','textdomain'),
+                'category' => esc_html__('Category','textdomain'),
+                'sub_category ' => esc_html__('Sub Category ','textdomain'),
+                'type' => esc_html__('Type  ','textdomain')
+            );
+
+            
+
+            $output = "";
+            foreach($dropdowns as $fn => $fl){
+                $items = $this->get_month_dropdown_data($fn);
+                $output .= '<div class="col-md-3 mb-3">';
+                $output .= '    <label for="'.$fn.'" class="form-label">Select '.$fl.'</label>';
+                $output .= '    <select class="form-select" id="'.$fn.'" name="'.$fn.'">';
+                $output .= '        <option value="" selected>Select '.$fl.'</option>';                
+                                    foreach($items as $key => $item) {
+                                        $output .= '<option value="'.$item->value.'">'.$item->label.'</option>';
+                                    }                        
+                $output .= '    </select>';
+                $output .= '</div>';
+            }
+            return $output;
+        }
+
+        function update_data(){
+            global $wpdb;
+            $table_name = $this->constants['daily_table_name'];
+            $wpdb->update($table_name, array('type'=>'Cash'), array('type'=>'Case'));
+            $wpdb->update($table_name, array('type'=>'Cash'), array('type'=>'Offline'));
+            $wpdb->update($table_name, array('type'=>'Online'), array('type'=>'online'));
+
+            $wpdb->update($table_name, array('name'=>'Alfiya-Fatima'), array('name'=>'AlfiyaFatima'));
+            $wpdb->update($table_name, array('name'=>'Alfiya-Fatima'), array('name'=>'AlfiyFatima'));
+            $wpdb->update($table_name, array('name'=>'Alfiya-Fatima'), array('name'=>'FatimaAlfiya'));
+
+            $wpdb->update($table_name, array('name'=>'Alfiya'), array('name'=>'Alifiya'));
+            $wpdb->update($table_name, array('name'=>'Alfiya'), array('name'=>'Alifya'));
+
+
+            $wpdb->update($table_name, array('name'=>'Saima'), array('name'=>'Sima'));
+            $wpdb->update($table_name, array('name'=>'Husain'), array('name'=>'Husan'));
+            $wpdb->update($table_name, array('name'=>'Husain'), array('name'=>'Hsain'));
+            $wpdb->update($table_name, array('name'=>'Sadaka'), array('name'=>'Sadka'));
+
+            
+        }
 		
 		function admin_menu_page()
 		{
@@ -20,31 +99,23 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 			$admin_url = 'admin.php?page='.$page;
             $start_date = date_i18n("Y-01-01");
 			$end_date = date_i18n("Y-m-t");
+
+            //$this->update_data();
             ?>
             
             <h1>Search Form</h1>           
 
             <form id="modal-form" name="modal-form" method="post" action="" class="row g-3">
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
                     <label for="start_date" class="form-label">Start Date</label>
                     <input type="text" class="form-control start_date" id="start_date" name="start_date" value="<?php echo esc_attr($start_date);?>" >
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
                     <label for="end_date" class="form-label">End Date</label>
                     <input type="text" class="form-control end_date" id="end_date" name="end_date" value="<?php echo esc_attr($end_date);?>" >
                 </div>
-                <div class="col-md-3">
-                    <label for="month" class="form-label">Select Month</label>
-                    <select class="form-select" id="month" name="month">
-                        <option value="" selected>Select Month</option>
-                        <?php
-                        for($i = 1; $i <= 12; $i++) {
-                            echo '<option value="'.$i.'">'.date('F', mktime(0, 0, 0, $i, 10)).'</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="col-md-3 align-self-end">
+                <?php echo $this->get_month_dropdown_fields();?>
+                <div class="col-md-3 mb-3 align-self-end">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </div>
 
@@ -60,18 +131,30 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
             <div class="search-alert alert" style="display:none;">Please Wait</div>
             <div class="search_results"></div>
 
+            <style>
+                .search_result{
+                    margin-bottom:35px;
+                }
+                .right_align{ text-align:right;}
+                .wp-core-ui select.form-select{
+                    padding: 4px 8px;
+                }
+            </style>
+
             <script>
                 var alert_interval = null;
 
-                jQuery(document).on("html_loaded", function( event) {
-                    new DataTable('.datatable.daily_kharch_report', {
-                        searching: true,
-                        lengthChange: true,
-                        info: true,
-                        stateSave: true,
-                    });
+                jQuery(document).on("html_loaded",function(){
+                        new DataTable('._widefat.daily', {
+                            searching: false,
+                            lengthChange: false,
+                            info: false,
+                            stateSave: false,
+                        });
                 });
+
                 jQuery(".search-alert").fadeOut();
+
                 jQuery("#modal-form").submit(function(e){
 						e.preventDefault();
 						
@@ -99,10 +182,12 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 								alert_box.addClass("alert-danger").html(data.message);
 							}
 
+                            alert_box.hide();
+
                             jQuery(document).trigger("html_loaded");
 							
 							alert_interval = setInterval(function () {
-								alert_box.removeClass("alert-primary alert-danger alert-success");								
+								// alert_box.removeClass("alert-primary alert-danger alert-success");
                                 alert_box.fadeOut();
 								jQuery("button").attr('disabled',false).removeClass('disabled');
 								clearInterval(alert_interval);
@@ -145,7 +230,24 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 			$report_type = isset($_POST['report_type']) ? $_POST['report_type'] : $this->constants['default_report_type'];
 			$start_date = isset($_POST['start_date']) ? $_POST['start_date'] : '';
 			$end_date = isset($_POST['end_date']) ? $_POST['end_date'] : '';
-			$sql = "";			
+            $month = isset($_POST['month']) ? $_POST['month'] : '';
+
+            $fields = array('month','name','category','sub_category','type');
+
+            $sql = "";
+            foreach($fields as $fn){
+                $fv = isset($_POST[$fn]) ? $_POST[$fn] : '';
+                if($fv != ""){
+                    switch($fn){
+                        case "month":
+                            $sql .= " AND DATE_FORMAT(date, '%Y-%m') = '{$fv}'";
+                            break;
+                        default:
+                            $sql .= " AND {$fn} = '{$fv}'";
+                            break;
+                    }
+                }
+            }			
 			if($start_date != "" and $end_date != ""){
 				$sql .= " AND date BETWEEN '{$start_date}' AND '{$end_date}'";
 			}
@@ -203,7 +305,8 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 			$columns = $this->get_columns($report_type);
             $output  =  "";
 			
-			$output .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"_widefat {$datatable} display compact table table-bordered table-striped\" style=\"width:100%\">";				
+            $output .= "<div class=\"search_result {$report_type}\">";
+			$output .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"_widefat {$report_type} display compact table table-bordered table-striped\" style=\"width:100%\">";				
 			$output .= "<thead>";				
 				$output .= "<tr>";
 					foreach($columns as $field_name => $column_label){
@@ -253,6 +356,7 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 					}				
 			$output .= "</tbody>";
 			$output .= "</table>";
+            $output .= "</div>";
 					
 			return($output);
 		}
@@ -267,7 +371,7 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 		{
             $return = array();
             $return['status'] = 1;
-            $return['message'] = "test";
+            $return['message'] = "Successfully found.";
             $return['output'] = $this->get_items();
 
             echo json_encode($return);
