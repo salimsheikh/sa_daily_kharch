@@ -30,6 +30,8 @@ if(!class_exists('sa_daily_kharch_init')){
 			add_submenu_page($menu_slug,esc_html__('Montly Report','niwcca'),esc_html__('Montly Report','niwcca'),$capability,$plugin_key.'-montly-report',$callback);
 
 			add_submenu_page($menu_slug,esc_html__('Summary Report','niwcca'),esc_html__('Summary Report','niwcca'),$capability,$plugin_key.'-summary-report',$callback);
+			add_submenu_page($menu_slug,esc_html__('Received Amount','niwcca'),esc_html__('Received Amount','niwcca'),$capability,$plugin_key.'-received-amount',$callback);
+
 
 			add_submenu_page($menu_slug,esc_html__('Manage kharch','niwcca'),esc_html__('Manage kharch','niwcca'),$capability,$plugin_key.'-manage-kharch',$callback);
 			add_submenu_page($menu_slug,esc_html__('Import','niwcca'),esc_html__('Import','niwcca'),$capability,$plugin_key.'-import-csv',$callback);
@@ -59,7 +61,10 @@ if(!class_exists('sa_daily_kharch_init')){
 					require_once('sa_daily_kharch_import_csv.php');
 					$obj = new sa_daily_kharch_import_csv($this->constants);
 					break;
-					
+				case $plugin_key."-received-amount":
+					require_once('sa_daily_kharch_received_amount.php');
+					$obj = new sa_daily_kharch_received_amount($this->constants);
+					break;					
 				case $plugin_key."-report":
 				case $plugin_key."-montly-report":
 					require_once('sa_daily_kharch_raports.php');
@@ -84,6 +89,7 @@ if(!class_exists('sa_daily_kharch_init')){
 				  || $page == $plugin_key."-report"
 				  || $page == $plugin_key."-montly-report"
 				  || $page == $plugin_key."-summary-report"
+				  || $page == $plugin_key."-received-amount"
 			){
 				$ver = isset($this->constants['ver']) ? $this->constants['ver'] : date("YmdHis");
 				$plugin_key  = isset($this->constants['ajax_action']) ? $this->constants['ajax_action'] : '';
@@ -111,7 +117,8 @@ if(!class_exists('sa_daily_kharch_init')){
 				
 				$localize_script['please_wait'] = esc_html__('Please Wait!','niwcca');
 				
-				if($page == $plugin_key."-report" || $page == $plugin_key."-montly-report" || $page == $plugin_key."-summary-report"){
+				if($page == $plugin_key."-report" || $page == $plugin_key."-montly-report" || $page == $plugin_key."-summary-report"
+				|| $page == $plugin_key."-received-amount"){
 					//wp_enqueue_script($plugin_key.'_dataTables','//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js',array());
 					//wp_enqueue_style($plugin_key.'_dataTables','//cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css',array());
 					

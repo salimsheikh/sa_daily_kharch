@@ -135,14 +135,13 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
                 .right_align{ text-align:right;}
                 .wp-core-ui select.form-select{
                     padding: 4px 8px;
-                }
+                }                
             </style>
-
             <script>
                 var alert_interval = null;
 
                 jQuery(document).on("html_loaded",function(){
-                        new DataTable('._widefat.daily', {
+                        new DataTable('._widefat.detail_report', {
                             searching: false,
                             lengthChange: false,
                             info: false,
@@ -206,12 +205,17 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
         function get_columns($report_type){
             $columns = array();
             switch($report_type){
-                case "daily":
+                case "detail_report":
                     $columns['date'] = esc_html__('Date', 'textdomain');
                     $columns['name'] = esc_html__('Name', 'textdomain');
                     $columns['category'] = esc_html__('Categroy', 'textdomain');
                     $columns['sub_category'] = esc_html__('Sub Category', 'textdomain');
                     $columns['type'] = esc_html__('Type', 'textdomain');
+                    $columns['amount'] = esc_html__('Amount', 'textdomain');
+                    break;
+                case "daily":
+                case "date":
+                    $columns['date'] = esc_html__('Date', 'textdomain');                    
                     $columns['amount'] = esc_html__('Amount', 'textdomain');
                     break;
                 case "monthly":
@@ -279,6 +283,7 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 
             $sql = " SELECT ";
             switch($report_type){
+                case "date":
                 case "name":
                 case "category":
                 case "sub_category":
@@ -287,6 +292,10 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
                     $sql .= " ,{$report_type}";
                     $sql .= " ,SUM(ROUND(amount,2)) AS amount";
                 break;
+                case "detail_report":
+                    $sql .= " date AS  group_by";
+                    $sql .= " ,date,name,category,sub_category,type,amount";
+                    break;
                 case "daily":
                     $sql .= " date AS  group_by";
                     $sql .= " ,date,name,category,sub_category,type,amount";
@@ -310,12 +319,19 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 
         function get_items(){
             $output = "";
-            $output .= $this->get_items_data('daily');
+            $output .= $this->get_items_data('detail_report');
+
+            $output .= "<div class=\"result_summary {$report_type}\">";
+            $month = isset($_POST['month']) ? $_POST['month'] : '';
+            if($month != ""){
+                $output .= $this->get_items_data('date');
+            }
             $output .= $this->get_items_data('monthly');
             $output .= $this->get_items_data('name');
             $output .= $this->get_items_data('category');
             $output .= $this->get_items_data('sub_category');
             $output .= $this->get_items_data('type');
+            $output .= "</div>";
             return $output;
         }
 
@@ -398,5 +414,3 @@ if(!class_exists('sa_daily_kharch_summary_reports')){
 		}
 	}
 }
-
-

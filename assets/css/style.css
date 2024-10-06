@@ -35,3 +35,9 @@
 .dataTables_wrapper .dataTables_length select{
 	padding-right:20px;
 }
+
+.result_summary{
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}

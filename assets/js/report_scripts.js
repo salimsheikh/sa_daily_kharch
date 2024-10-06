@@ -1,6 +1,6 @@
 jQuery(document).ready(function(){
 
-	jQuery(".start_date, .end_date").datepicker({
+	jQuery(".start_date, .end_date, .recieved_date").datepicker({
 		"dateFormat" : "YY-mm-dd"
 	});
 	
