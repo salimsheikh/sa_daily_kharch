@@ -41,3 +41,43 @@
   justify-content: space-between;
   gap: 20px;
 }
+
+
+/* Custom styles for the container */
+.container {
+  max-width: 600px;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for file input field */
+.form-control-file {
+  border: 2px solid #ced4da;
+  border-radius: 5px;
+  padding: 5px;
+  width: 100%;
+}
+
+/* Custom styles for the button */
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+/* Button hover effect */
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #004085;
+}
+
+/* Space between form elements */
+.form-group {
+  margin-bottom: 20px;
+}
