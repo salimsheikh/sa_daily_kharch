@@ -140,7 +140,7 @@ if(!class_exists('sa_daily_kharch')){
 			require_once('includes/sa_daily_kharch_init.php');
 			
 			// Instantiate the `sa_daily_kharch_init` class with constants
-			$obj = new sa_daily_kharch_init($this->constants);
+			$obj = new sa_daily_kharch_init(array());
 			
 			// Get the plugin key and use it to create an option name
 			$plugin_key = $obj->constants['plugin_key'];
